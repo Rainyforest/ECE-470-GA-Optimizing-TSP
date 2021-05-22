@@ -14,14 +14,9 @@ import matplotlib.pyplot as plt
 
 
 class Pt(complex):
-    x = property(lambda (self): self.real)
-    y = property(lambda (self): self.imag)
-
-    def __str__(self):
-        return '(%g, %g)' % (self.real, self.imag)
-
-    def __repr__(self):
-        return str(self)
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 
 class TSP:
@@ -59,6 +54,6 @@ def plot_path(path, style='bo-'):
 
 
 # Test code
-random_set = rand_pts(7)
+random_set = rand_pts(10)
 tsp = TSP()
 plot_path(tsp.min_path(random_set))
