@@ -14,16 +14,16 @@ Population Models
 Fitness Function
     - Requirements: Efficient & Sensitive
 Selection
-    - Proportionate Selecton
+    - Proportionate Selection
         - Roulette Wheel Selection
          （Proportional to the Fitness）
         - Random Selection
         - Tournament Selection
-        - Rank Selection   
+        - Rank Selection
 Crossover
     - Two selected individuals generate one or more offspring
         - Partially mapped crossover (PMX)
-          Reference: https://user.ceng.metu.edu.tr/~ucoluk/research/publications/tsp    
+          Reference: https://user.ceng.metu.edu.tr/~ucoluk/research/publications/tsp
 Mutation
     - Randomly select gene and change their values
         - Dynamic Mutation
@@ -34,37 +34,43 @@ Terminate Conditions (one of them)
     - When we reach a specific fitness value
 """
 
+import numpy as np
 import random
 
+from tsp.tsp import TSP
+
+
 class GA:
-        
-    # This should encode a path to a string
-    def encoding(self, path):
+
+    def __init__(self, tsp, population_size=30):
+        self.tsp = tsp
+        self.POPULATION_SIZE = population_size
+
+    def decoding(self, string) -> list:
         pass
 
-    def decoding(self, string):
+    def initialization(self) -> list:
         pass
 
-    def population_initialization():
+    def selection(self, population) -> str:
         pass
 
-    def selection(self, population):
+    def crossover(self, x, y) -> str:
         pass
 
-    def crossover(self, x, y):
+    def is_mutate(self) -> bool:
         pass
 
-    # A function to provide small chance of randomness for mutation
-    def is_mutate(self):
-        pass
-
-    def mutation(self, individual):
-        if self.is_mutate(): # small chance
+    def mutation(self, individual) -> str:
+        """
+        if self.is_mutate():  # small chance
             # do something
             pass
-        else: 
+        else:
             # do not mutate
             pass
+        """
+        pass
 
     def fitness_fn(self, individual):
         pass
@@ -72,24 +78,111 @@ class GA:
     # Function to decide if the generation reproduces satisfying individual
     # and could terminate the training
     def is_optimal(self, population):
-        # iterate through the new population and call fitness function 
+        # iterate through the new population and call fitness function
+        pass
+
+    def evolve(self, population):
+        """
+            while not self.is_optimal():
+                new_population = {}
+                # generate a group of new generation
+                for i in range(len(population)):
+                    # parents selection
+                    x = self.selection(population)
+                    y = self.selection(population)
+                    # crossover
+                    child = self.crossover(x, y)
+                    # mutation
+                    child = self.mutation(child)
+                    new_population.add(child)
+                population = new_population
+            return population
+        """
         pass
 
 
-    
-    def evolve(self, population):
-        while not self.is_optimal():
-            new_population = {}
-            # generate a group of new generation
-            for i in range(len(population)):
-                # parents selection
-                x = self.selection(population)
-                y = self.selection(population)
-                # crossover
-                child = self.crossover(x,y)
-                # mutation
-                child = self.mutation(child)
-                new_population.add(child)
-            population = new_population
+class PermutationGA(GA):
+
+    def __init__(self, tsp, population_size):
+        super().__init__(tsp, population_size)
+
+    # Encoded as a list
+    def decoding(self, individual) -> list:
+        return [tsp.pts[x] for x in individual]
+
+    """
+    Randomly initialize the population
+    N: chromosome size (# of genes)
+    """
+
+    def initialization(self) -> list:
+        N = len(self.tsp.pts)
+        population = np.zeros(shape=(self.POPULATION_SIZE, N), dtype=np.int64)
+        for x in range(self.POPULATION_SIZE):
+            population[x, :] = np.random.permutation(N)
         return population
-        
+
+    def selection(self, population) -> str:
+        fitness = [self.fitness_fn(x) for x in population]
+        roulette_wheel = list(map(lambda x: x / sum(fitness), fitness))
+        prob = 0
+        pick = random.random()  # pick a number btw 0-1
+        for i in range(len(roulette_wheel)):
+            prob += roulette_wheel[i]
+            if prob >= pick:
+                return population[i]
+        # fallback
+        return random.choice(population)
+
+    def crossover(self, x, y) -> str:
+        pass
+
+    def is_mutate(self) -> bool:
+        pass
+
+    def mutation(self, individual) -> str:
+        """
+        if self.is_mutate():  # small chance
+            # do something
+            pass
+        else:
+            # do not mutate
+            pass
+        """
+        pass
+
+    def fitness_fn(self, individual):
+        return self.tsp.path_length(self.decoding(individual))
+
+    # Function to decide if the generation reproduces satisfying individual
+    # and could terminate the training
+    def is_optimal(self, population):
+        # iterate through the new population and call fitness function
+        pass
+
+    def evolve(self, population):
+        """
+            while not self.is_optimal():
+                new_population = {}
+                # generate a group of new generation
+                for i in range(len(population)):
+                    # parents selection
+                    x = self.selection(population)
+                    y = self.selection(population)
+                    # crossover
+                    child = self.crossover(x, y)
+                    # mutation
+                    child = self.mutation(child)
+                    new_population.add(child)
+                population = new_population
+            return population
+        """
+        pass
+
+
+tsp = TSP(7)
+PGA = PermutationGA(tsp, 10)
+population = PGA.initialization()
+print(population)
+selected = PGA.selection(population)
+tsp.plot_path(PGA.decoding(selected))
