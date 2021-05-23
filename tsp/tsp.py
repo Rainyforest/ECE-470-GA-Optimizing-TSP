@@ -54,6 +54,6 @@ def plot_path(path, style='bo-'):
 
 
 # Test code
-random_set = rand_pts(10)
+random_set = rand_pts(7)
 tsp = TSP()
 plot_path(tsp.min_path(random_set))
