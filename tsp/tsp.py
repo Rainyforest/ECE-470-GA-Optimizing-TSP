@@ -27,18 +27,6 @@ class TSP:
                            n_iter=1000, nodes=nodes)
         return tsp.evolve()
 
-    def path_length(self, path):
-        return sum(self.dist(path[x], path[x - 1]) for x in range(len(path)))
-
-    # Distance function btw 2 points, replaceable (e.g. sphere distance, navigation distance)
-    @staticmethod
-    def dist(p, q):
-        return abs(p - q)
-
-    @staticmethod
-    def all_paths(pts):
-        return itertools.permutations(pts)
-
     @staticmethod
     def rand_pts(n, width=900, height=600, seed=1):
         # Make a list of n cities, each with random coordinates within a (width x height) rectangle.
