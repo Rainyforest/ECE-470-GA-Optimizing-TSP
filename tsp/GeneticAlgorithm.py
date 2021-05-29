@@ -36,6 +36,7 @@ Terminate Conditions (one of them)
     - When we reach a specific fitness value
 """
 
+
 class GeneticAlgorithm:
 
     def __init__(self, population_size, individual_size, crossover_prob, mutation_prob, n_iter, maximize, fitness):
@@ -88,7 +89,8 @@ class GeneticAlgorithm:
 
 class UnaryFunctionOptimizer(GeneticAlgorithm):
 
-    def __init__(self, population_size, individual_size, crossover_prob, mutation_prob, n_iter, maximize, obj_func, interval):
+    def __init__(self, population_size, individual_size, crossover_prob, mutation_prob, n_iter, maximize, obj_func,
+                 interval):
         super().__init__(population_size, individual_size, crossover_prob, mutation_prob, n_iter, maximize, obj_func)
         self.interval = interval
 
@@ -97,13 +99,15 @@ class UnaryFunctionOptimizer(GeneticAlgorithm):
         return population
 
     def decode(self, population):
-        population = (population.dot(np.power(2, np.arange(self.individual_size)[::-1])) / np.power(2, self.individual_size) - 0.5) * \
+        population = (population.dot(np.power(2, np.arange(self.individual_size)[::-1])) / np.power(2,
+                                                                                                    self.individual_size) - 0.5) * \
                      (self.interval[1] - self.interval[0]) + 0.5 * (self.interval[0] + self.interval[1])
         return population
 
     def select(self, population, fitness):
         fitness = fitness + 1e-8
-        chosen = np.random.choice(np.arange(self.population_size), size=self.population_size, replace=True, p=fitness / fitness.sum())
+        chosen = np.random.choice(np.arange(self.population_size), size=self.population_size, replace=True,
+                                  p=fitness / fitness.sum())
         return population[chosen]
 
     def crossover(self, population1, population2):
@@ -112,7 +116,9 @@ class UnaryFunctionOptimizer(GeneticAlgorithm):
         return population1
 
     def mutate(self, population):
-        mtpoints = np.random.choice([0, 1], size=self.population_size * self.individual_size, p=[1 - self.mutation_prob, self.mutation_prob]).reshape(self.population_size, self.individual_size)
+        mtpoints = np.random.choice([0, 1], size=self.population_size * self.individual_size,
+                                    p=[1 - self.mutation_prob, self.mutation_prob]).reshape(self.population_size,
+                                                                                            self.individual_size)
         population = (population + mtpoints) % 2
         return population
 
@@ -138,7 +144,8 @@ class TSPOptimizer(GeneticAlgorithm):
 
     def select(self, population, fitness):
         fitness = fitness + 1e-8
-        idx = np.random.choice(np.arange(self.population_size), size=self.population_size, replace=True, p=fitness / fitness.sum())
+        idx = np.random.choice(np.arange(self.population_size), size=self.population_size, replace=True,
+                               p=fitness / fitness.sum())
         return population[idx]
 
     def crossover(self, population1, population2):
@@ -174,18 +181,21 @@ class TSPOptimizer(GeneticAlgorithm):
         population[:n_mutation, mtpoint2] = population_copy[:n_mutation, mtpoint1]
         return population
 
+
 # Test code
 if __name__ == '__main__':
     obj_func = lambda x: np.sin(x)
     interval = [-2, 2]
-    optimizer = UnaryFunctionOptimizer(population_size=256, individual_size=16, crossover_prob=0.9, mutation_prob=0.01, obj_func=obj_func, n_iter=1000, maximize=False, interval=interval)
+    optimizer = UnaryFunctionOptimizer(population_size=256, individual_size=16, crossover_prob=0.9, mutation_prob=0.01,
+                                       obj_func=obj_func, n_iter=1000, maximize=False, interval=interval)
     opt_individual = optimizer.evolve()
     opt_decoding = optimizer.decode(opt_individual)
     opt_obj = obj_func(opt_decoding)
     print(opt_individual, opt_decoding, opt_obj)
 
     nodes = [(1, 1), (2, 1), (3, 1), (3, 2), (3, 3), (2, 3)]
-    tsp = TSPOptimizer(population_size=256, individual_size=len(nodes), crossover_prob=0.9, mutation_prob=0.01, n_iter=1000, nodes=nodes)
+    tsp = TSPOptimizer(population_size=256, individual_size=len(nodes), crossover_prob=0.9, mutation_prob=0.01,
+                       n_iter=1000, nodes=nodes)
     opt_individual = tsp.evolve()
     opt_decoding = np.array(opt_individual.tolist() + [opt_individual[0]])
     x_coord = [nodes[node][0] for node in opt_decoding]
